@@ -18,6 +18,7 @@ import asyncio
 
 import cv2
 import numpy as np
+import depthai as dai
 from farm_ng.oak import oak_pb2
 from farm_ng.oak.camera_client import OakCameraClient
 from farm_ng.service import service_pb2
@@ -71,19 +72,34 @@ async def main(address: str, port: int, stream_every_n: int) -> None:
                 imageL = cv2.imdecode(imageL, cv2.IMREAD_UNCHANGED)
                 
                 # visualize the image
+                # cv2.namedWindow("imageDisp", cv2.WINDOW_NORMAL)
+                # cv2.imshow("imageDisp", imageDisp)
 
-                cv2.namedWindow("imageDisp", cv2.WINDOW_NORMAL)
-                cv2.imshow("imageDisp", imageDisp)
-
-                cv2.namedWindow("imageR", cv2.WINDOW_NORMAL)
-                cv2.imshow("imageR", imageR)
+                # cv2.namedWindow("imageR", cv2.WINDOW_NORMAL)
+                # cv2.imshow("imageR", imageR)
                 
-                cv2.namedWindow("imageL", cv2.WINDOW_NORMAL)
-                cv2.imshow("imageL", imageL)
+                # cv2.namedWindow("imageL", cv2.WINDOW_NORMAL)
+                # cv2.imshow("imageL", imageL)
 
                 # imshow cannot display RGB simaultaneously with other 3 windows?
                 # cv2.namedWindow("imageRGB", cv2.WINDOW_NORMAL)
                 # cv2.imshow("imageRGB", imageRGB)
+
+                # DEPTHAI
+                # pipeline = dai.Pipeline()
+                # stereo = pipeline.create(dai.node.StereoDepth)
+
+                # Initiate and StereoBM object
+                stereo = cv2.StereoBM_create(numDisparities=128, blockSize=15)
+
+                # compute the disparity map
+                imageLnew = cv2.cvtColor(imageLnew, cv2.COLOR_BGR2GRAY)
+                imageRnew = cv2.cvtColor(imageRnew, cv2.COLOR_BGR2GRAY)
+
+
+                disparity = stereo.compute(imageLnew,imageRnew)
+                cv2.imshow(disparity,'gray')
+
 
                 cv2.waitKey(1)
             except Exception as e:
